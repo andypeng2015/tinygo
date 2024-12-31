@@ -187,7 +187,10 @@ fmt-check: ## Warn if any source needs reformatting
 	@unformatted=$$(gofmt -l $(FMT_PATHS)); [ -z "$$unformatted" ] && exit 0; echo "Unformatted:"; for fn in $$unformatted; do echo "  $$fn"; done; exit 1
 
 
-gen-device: gen-device-avr gen-device-esp gen-device-nrf gen-device-sam gen-device-sifive gen-device-kendryte gen-device-nxp gen-device-rp gen-device-renesas ## Generate microcontroller-specific sources
+gen-device: gen-device-avr gen-device-esp gen-device-nrf gen-device-sam gen-device-sifive gen-device-kendryte gen-device-nxp gen-device-rp ## Generate microcontroller-specific sources
+ifneq ($(RENESAS), 0)
+gen-device: gen-device-renesas
+endif
 ifneq ($(STM32), 0)
 gen-device: gen-device-stm32
 endif
