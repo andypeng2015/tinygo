@@ -2,16 +2,28 @@
 
 #define _GNU_SOURCE
 #include <pthread.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
-// BDWGC also uses SIGRTMIN+6 on Linux, which seems like a reasonable choice.
 #ifdef __linux__
+#include <semaphore.h>
+
+// BDWGC also uses SIGRTMIN+6 on Linux, which seems like a reasonable choice.
 #define taskPauseSignal (SIGRTMIN + 6)
-#endif
+
+#elif __APPLE__
+#include <dispatch/dispatch.h>
+// SIGIO is for interrupt-driven I/O.
+// I don't think anybody should be using this nowadays, so I think we can
+// repurpose it as a signal for GC.
+// BDWGC uses a special way to pause/resume other threads on MacOS, which may be
+// better but needs more work. Using signal keeps the code similar between Linux
+// and MacOS.
+#define taskPauseSignal SIGIO
+
+#endif // __linux__, __APPLE__
 
 // Pointer to the current task.Task structure.
 // Ideally the entire task.Task structure would be a thread-local variable but
@@ -23,7 +35,11 @@ struct state_pass {
     void      *args;
     void      *task;
     uintptr_t *stackTop;
+    #if __APPLE__
+    dispatch_semaphore_t startlock;
+    #else
     sem_t     startlock;
+    #endif
 };
 
 // Handle the GC pause in Go.
@@ -68,7 +84,11 @@ static void* start_wrapper(void *arg) {
 
     // Notify the caller that the thread has successfully started and
     // initialized.
+    #if __APPLE__
+    dispatch_semaphore_signal(state->startlock);
+    #else
     sem_post(&state->startlock);
+    #endif
 
     // Run the goroutine function.
     start(args);
@@ -92,11 +112,19 @@ int tinygo_task_start(uintptr_t fn, void *args, void *task, pthread_t *thread, u
         .task      = task,
         .stackTop  = stackTop,
     };
+    #if __APPLE__
+    state.startlock = dispatch_semaphore_create(0);
+    #else
     sem_init(&state.startlock, 0, 0);
+    #endif
     int result = pthread_create(thread, NULL, &start_wrapper, &state);
 
     // Wait until the thread has been created and read all state_pass variables.
+    #if __APPLE__
+    dispatch_semaphore_wait(state.startlock, DISPATCH_TIME_FOREVER);
+    #else
     sem_wait(&state.startlock);
+    #endif
 
     return result;
 }

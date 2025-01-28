@@ -385,7 +385,7 @@ func defaultTarget(options *Options) (*TargetSpec, error) {
 			platformVersion = "11.0.0" // first macosx platform with arm64 support
 		}
 		llvmvendor = "apple"
-		spec.Scheduler = "tasks"
+		spec.Scheduler = "threads"
 		spec.Linker = "ld.lld"
 		spec.Libc = "darwin-libSystem"
 		// Use macosx* instead of darwin, otherwise darwin/arm64 will refer to
@@ -399,6 +399,7 @@ func defaultTarget(options *Options) (*TargetSpec, error) {
 		)
 		spec.ExtraFiles = append(spec.ExtraFiles,
 			"src/internal/futex/futex_darwin.c",
+			"src/internal/task/task_threads.c",
 			"src/runtime/os_darwin.c",
 			"src/runtime/runtime_unix.c",
 			"src/runtime/signal.c")
