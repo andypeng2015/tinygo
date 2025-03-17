@@ -226,7 +226,7 @@ var libCompilerRT = Library{
 		// Development build.
 		return filepath.Join(goenv.Get("TINYGOROOT"), "lib/compiler-rt-builtins")
 	},
-	librarySources: func(target string) ([]string, error) {
+	librarySources: func(target string, _ bool) ([]string, error) {
 		builtins := append([]string{}, genericBuiltins...) // copy genericBuiltins
 		switch compileopts.CanonicalArchName(target) {
 		case "arm":

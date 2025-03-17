@@ -178,11 +178,27 @@ func TestBuild(t *testing.T) {
 
 		t.Run("WebAssembly", func(t *testing.T) {
 			t.Parallel()
+
 			runPlatTests(optionsFromTarget("wasm", sema), tests, t)
+			// Test with -gc=boehm.
+			t.Run("gc.go-boehm", func(t *testing.T) {
+				t.Parallel()
+				optionsBoehm := optionsFromTarget("wasm", sema)
+				optionsBoehm.GC = "boehm"
+				runTest("gc.go", optionsBoehm, t, nil, nil)
+			})
 		})
-		t.Run("WASI", func(t *testing.T) {
+		t.Run("WASIp1", func(t *testing.T) {
 			t.Parallel()
 			runPlatTests(optionsFromTarget("wasip1", sema), tests, t)
+
+			// Test with -gc=boehm.
+			t.Run("gc.go-boehm", func(t *testing.T) {
+				t.Parallel()
+				optionsBoehm := optionsFromTarget("wasip1", sema)
+				optionsBoehm.GC = "boehm"
+				runTest("gc.go", optionsBoehm, t, nil, nil)
+			})
 		})
 		t.Run("WASIp2", func(t *testing.T) {
 			t.Parallel()

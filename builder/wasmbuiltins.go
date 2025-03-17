@@ -41,7 +41,7 @@ var libWasmBuiltins = Library{
 		}
 	},
 	sourceDir: func() string { return filepath.Join(goenv.Get("TINYGOROOT"), "lib/wasi-libc") },
-	librarySources: func(target string) ([]string, error) {
+	librarySources: func(target string, _ bool) ([]string, error) {
 		return []string{
 			// memory builtins needed for llvm.memcpy.*, llvm.memmove.*, and
 			// llvm.memset.* LLVM intrinsics.

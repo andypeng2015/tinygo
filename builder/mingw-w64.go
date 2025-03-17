@@ -48,7 +48,7 @@ var libMinGW = Library{
 		}
 		return flags
 	},
-	librarySources: func(target string) ([]string, error) {
+	librarySources: func(target string, _ bool) ([]string, error) {
 		// These files are needed so that printf and the like are supported.
 		var sources []string
 		if strings.Split(target, "-")[0] == "i386" {

@@ -20,7 +20,6 @@ package runtime
 
 import (
 	"internal/gclayout"
-	"internal/reflectlite"
 	"internal/task"
 	"unsafe"
 )
@@ -39,22 +38,30 @@ var needsResumeWorld bool
 func initHeap() {
 	libgc_init()
 
-	libgc_set_push_other_roots(gcCallbackPtr)
+	// Call GC_set_push_other_roots(gcCallback) in C because of function
+	// signature differences that do matter in WebAssembly.
+	gcInit()
 }
 
-var gcCallbackPtr = reflectlite.ValueOf(gcCallback).UnsafePointer()
+//export tinygo_runtime_bdwgc_init
+func gcInit()
 
+//export tinygo_runtime_bdwgc_callback
 func gcCallback() {
 	// Mark globals and all stacks, and stop the world if we're using threading.
 	gcMarkReachable()
 
-	if needsResumeWorld {
-		// Should never happen, check for it anyway.
-		runtimePanic("gc: world already stopped")
-	}
+	// If we use a scheduler with parallelism (the threads scheduler for
+	// example), we need to call gcResumeWorld() after scanning has finished.
+	if hasParallelism {
+		if needsResumeWorld {
+			// Should never happen, check for it anyway.
+			runtimePanic("gc: world already stopped")
+		}
 
-	// Note that we need to resume the world after finishing the GC call.
-	needsResumeWorld = true
+		// Note that we need to resume the world after finishing the GC call.
+		needsResumeWorld = true
+	}
 }
 
 func markRoots(start, end uintptr) {

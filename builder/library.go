@@ -38,7 +38,7 @@ type Library struct {
 	sourceDir func() string
 
 	// The source files, relative to sourceDir.
-	librarySources func(target string) ([]string, error)
+	librarySources func(target string, libcNeedsMalloc bool) ([]string, error)
 
 	// The source code for the crt1.o file, relative to sourceDir.
 	crt1Source string
@@ -226,7 +226,7 @@ func (l *Library) load(config *compileopts.Config, tmpdir string) (job *compileJ
 
 	// Create jobs to compile all sources. These jobs are depended upon by the
 	// archive job above, so must be run first.
-	paths, err := l.librarySources(target)
+	paths, err := l.librarySources(target, config.LibcNeedsMalloc())
 	if err != nil {
 		return nil, nil, err
 	}
