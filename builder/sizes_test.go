@@ -42,7 +42,7 @@ func TestBinarySize(t *testing.T) {
 	// This is a small number of very diverse targets that we want to test.
 	tests := []sizeTest{
 		// microcontrollers
-		{"hifive1b", "examples/echo", 4556, 280, 0, 2268},
+		{"hifive1b", "examples/echo", 4556, 280, 0, 2264},
 		{"microbit", "examples/serial", 2920, 388, 8, 2272},
 		{"wioterminal", "examples/pininterrupt", 7379, 1489, 116, 6912},
 

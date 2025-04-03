@@ -252,3 +252,19 @@ func run() {
 	}()
 	scheduler(false)
 }
+
+func lockAtomics() interrupt.State {
+	return interrupt.Disable()
+}
+
+func unlockAtomics(mask interrupt.State) {
+	interrupt.Restore(mask)
+}
+
+func printlock() {
+	// nothing to do
+}
+
+func printunlock() {
+	// nothing to do
+}

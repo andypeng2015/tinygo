@@ -1,8 +1,14 @@
-//go:build (gc.conservative || gc.precise || gc.boehm) && !tinygo.wasm && !scheduler.threads
+//go:build (gc.conservative || gc.precise || gc.boehm) && !tinygo.wasm && !scheduler.threads && !scheduler.cores
 
 package runtime
 
-import "internal/task"
+import (
+	"internal/task"
+	"sync/atomic"
+)
+
+// Unused.
+var gcScanState atomic.Uint32
 
 func gcMarkReachable() {
 	markStack()

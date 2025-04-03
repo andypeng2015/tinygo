@@ -2,7 +2,10 @@
 
 package runtime
 
-import "internal/task"
+import (
+	"internal/task"
+	"runtime/interrupt"
+)
 
 const hasScheduler = false // not using the cooperative scheduler
 
@@ -126,4 +129,31 @@ func schedulerRunQueue() *task.Queue {
 func runqueueForGC() *task.Queue {
 	// There is only a runqueue when using the cooperative scheduler.
 	return nil
+}
+
+// Lock to make sure print calls do not interleave.
+var printLock task.Mutex
+
+func printlock() {
+	printLock.Lock()
+}
+
+func printunlock() {
+	printLock.Unlock()
+}
+
+// The atomics lock isn't used as a lock for actual atomics. It is used inside
+// internal/task.Stack and internal/task.Queue to make sure their operations are
+// actually atomic. (This might not actually be needed, since the use in
+// sync.Cond doesn't need atomicity).
+
+var atomicsLock task.Mutex
+
+func lockAtomics() interrupt.State {
+	atomicsLock.Lock()
+	return 0
+}
+
+func unlockAtomics(mask interrupt.State) {
+	atomicsLock.Unlock()
 }

@@ -2,7 +2,10 @@
 
 package runtime
 
-import "internal/task"
+import (
+	"internal/task"
+	"runtime/interrupt"
+)
 
 const hasScheduler = false
 
@@ -72,4 +75,20 @@ func scheduler(returnAtDeadlock bool) {
 	// The scheduler should never be run when using -scheduler=none. Meaning,
 	// this code should be unreachable.
 	runtimePanic("unreachable: scheduler must not be called with the 'none' scheduler")
+}
+
+func lockAtomics() interrupt.State {
+	return interrupt.Disable()
+}
+
+func unlockAtomics(mask interrupt.State) {
+	interrupt.Restore(mask)
+}
+
+func printlock() {
+	// nothing to do
+}
+
+func printunlock() {
+	// nothing to do
 }

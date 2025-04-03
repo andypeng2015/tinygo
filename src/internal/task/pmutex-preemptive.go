@@ -1,4 +1,4 @@
-//go:build scheduler.threads
+//go:build !tinygo.unicore
 
 package task
 

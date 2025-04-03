@@ -110,6 +110,11 @@ func (c *Config) BuildTags() []string {
 		"math_big_pure_go",                           // to get math/big to work
 		"gc." + c.GC(), "scheduler." + c.Scheduler(), // used inside the runtime package
 		"serial." + c.Serial()}...) // used inside the machine package
+	switch c.Scheduler() {
+	case "threads", "cores":
+	default:
+		tags = append(tags, "tinygo.unicore")
+	}
 	for i := 1; i <= c.GoMinorVersion; i++ {
 		tags = append(tags, fmt.Sprintf("go1.%d", i))
 	}
