@@ -1398,6 +1398,8 @@ func printBuildOutput(err error, jsonDiagnostics bool) {
 			ImportPath string
 			Action     string
 			Output     string `json:",omitempty"`
+			StartPos   string `json:",omitempty"` // non-standard
+			EndPos     string `json:",omitempty"` // non-standard
 		}
 
 		for _, diags := range diagnostics.CreateDiagnostics(err) {
@@ -1407,19 +1409,25 @@ func printBuildOutput(err error, jsonDiagnostics bool) {
 					Action:     "build-output",
 					Output:     "# " + diags.ImportPath + "\n",
 				})
-				os.Stdout.Write(output)
-				os.Stdout.Write([]byte{'\n'})
+				os.Stdout.Write(append(output, '\n'))
 			}
 			for _, diag := range diags.Diagnostics {
 				w := &bytes.Buffer{}
 				diag.WriteTo(w, workingDir)
-				output, _ := json.Marshal(jsonDiagnosticOutput{
+				data := jsonDiagnosticOutput{
 					ImportPath: diags.ImportPath,
 					Action:     "build-output",
 					Output:     w.String(),
-				})
-				os.Stdout.Write(output)
-				os.Stdout.Write([]byte{'\n'})
+				}
+				if diag.StartPos.IsValid() && diag.EndPos.IsValid() {
+					// Include the non-standard StartPos/EndPos values. These
+					// are useful for the TinyGo Playground to show better error
+					// messages.
+					data.StartPos = diagnostics.RelativePosition(diag.StartPos, workingDir).String()
+					data.EndPos = diagnostics.RelativePosition(diag.EndPos, workingDir).String()
+				}
+				output, _ := json.Marshal(data)
+				os.Stdout.Write(append(output, '\n'))
 			}
 
 			// Emit the "Action":"build-fail" JSON.
@@ -1427,8 +1435,7 @@ func printBuildOutput(err error, jsonDiagnostics bool) {
 				ImportPath: diags.ImportPath,
 				Action:     "build-fail",
 			})
-			os.Stdout.Write(output)
-			os.Stdout.Write([]byte{'\n'})
+			os.Stdout.Write(append(output, '\n'))
 		}
 		os.Exit(1)
 	}
