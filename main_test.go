@@ -687,6 +687,10 @@ func TestWasmExport(t *testing.T) {
 				// again.
 				checkResult("reentrantCall(2, 3)", mustCall(mod.ExportedFunction("reentrantCall").Call(ctx, 2, 3)), []uint64{5})
 				checkResult("reentrantCall(1, 8)", mustCall(mod.ExportedFunction("reentrantCall").Call(ctx, 1, 8)), []uint64{9})
+
+				// Check that goroutines started inside //go:wasmexport don't
+				// block the called function from returning.
+				checkResult("goroutineExit()", mustCall(mod.ExportedFunction("goroutineExit").Call(ctx)), nil)
 			}
 
 			// Add wasip1 module.

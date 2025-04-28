@@ -30,6 +30,10 @@ const hasParallelism = false
 // Set to true after main.main returns.
 var mainExited bool
 
+// Set to true when the scheduler should exit after the next switch to the
+// scheduler. This is a special case for //go:wasmexport.
+var schedulerExit bool
+
 // Queues used by the scheduler.
 var (
 	runqueue           task.Queue
@@ -214,6 +218,13 @@ func scheduler(returnAtDeadlock bool) {
 		// Run the given task.
 		scheduleLogTask("  run:", t)
 		t.Resume()
+
+		// The last call to Resume() was a signal to stop the scheduler since a
+		// //go:wasmexport function returned.
+		if GOARCH == "wasm" && schedulerExit {
+			schedulerExit = false // reset the signal
+			return
+		}
 	}
 }
 
