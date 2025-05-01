@@ -7,7 +7,7 @@ package machine
 // The timer channels/pins match the hardware, and encode the same information
 // as pinTimerMapping but in a more generic (less efficient) way.
 
-var TCC0 = timerType{
+var TCC0 = &timerType{
 	instance:   0,
 	frequency:  48e6,
 	bits:       24,
@@ -20,7 +20,7 @@ var TCC0 = timerType{
 	},
 }
 
-var TCC1 = timerType{
+var TCC1 = &timerType{
 	instance:   1,
 	frequency:  48e6,
 	bits:       24,
@@ -33,7 +33,7 @@ var TCC1 = timerType{
 	},
 }
 
-var TCC2 = timerType{
+var TCC2 = &timerType{
 	instance:   2,
 	frequency:  48e6,
 	bits:       16,

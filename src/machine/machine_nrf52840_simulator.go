@@ -7,7 +7,7 @@ package machine
 // Channel values below are nil, so that they get filled in on the first use.
 // This is the same as what happens on baremetal.
 
-var PWM0 = timerType{
+var PWM0 = &timerType{
 	instance:   0,
 	frequency:  16e6,
 	bits:       15,
@@ -20,7 +20,7 @@ var PWM0 = timerType{
 	},
 }
 
-var PWM1 = timerType{
+var PWM1 = &timerType{
 	instance:   1,
 	frequency:  16e6,
 	bits:       15,
@@ -33,7 +33,7 @@ var PWM1 = timerType{
 	},
 }
 
-var PWM2 = timerType{
+var PWM2 = &timerType{
 	instance:   2,
 	frequency:  16e6,
 	bits:       15,
@@ -46,7 +46,7 @@ var PWM2 = timerType{
 	},
 }
 
-var PWM3 = timerType{
+var PWM3 = &timerType{
 	instance:   3,
 	frequency:  16e6,
 	bits:       15,

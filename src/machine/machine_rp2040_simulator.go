@@ -7,7 +7,7 @@
 
 package machine
 
-var PWM0 = timerType{
+var PWM0 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -18,7 +18,7 @@ var PWM0 = timerType{
 	},
 }
 
-var PWM1 = timerType{
+var PWM1 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -29,7 +29,7 @@ var PWM1 = timerType{
 	},
 }
 
-var PWM2 = timerType{
+var PWM2 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -40,7 +40,7 @@ var PWM2 = timerType{
 	},
 }
 
-var PWM3 = timerType{
+var PWM3 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -51,7 +51,7 @@ var PWM3 = timerType{
 	},
 }
 
-var PWM4 = timerType{
+var PWM4 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -62,7 +62,7 @@ var PWM4 = timerType{
 	},
 }
 
-var PWM5 = timerType{
+var PWM5 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -73,7 +73,7 @@ var PWM5 = timerType{
 	},
 }
 
-var PWM6 = timerType{
+var PWM6 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
@@ -84,7 +84,7 @@ var PWM6 = timerType{
 	},
 }
 
-var PWM7 = timerType{
+var PWM7 = &timerType{
 	instance:   0,
 	frequency:  200e6,
 	bits:       16,
