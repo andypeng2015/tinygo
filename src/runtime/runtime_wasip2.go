@@ -50,3 +50,20 @@ func sleepTicks(d timeUnit) {
 func ticks() timeUnit {
 	return timeUnit(monotonicclock.Now())
 }
+
+// Need to stub these for `os/signal`, but wasi doesn't support signals.
+
+//go:linkname signal_disable os/signal.signal_disable
+func signal_disable(uint32) {}
+
+//go:linkname signal_enable os/signal.signal_enable
+func signal_enable(uint32) {}
+
+//go:linkname signal_ignore os/signal.signal_ignore
+func signal_ignore(uint32) {}
+
+//go:linkname signal_ignored os/signal.signal_ignored
+func signal_ignored(uint32) bool { return false }
+
+//go:linkname signal_recv os/signal.signal_recv
+func signal_recv() uint32 { return ^uint32(0) }
