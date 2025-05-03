@@ -92,14 +92,12 @@ commands:
             - /go/pkg/mod
 
 jobs:
-  test-llvm15-go119:
+  test-llvm15-go122:
     docker:
-      - image: golang:1.19-bullseye
+      - image: golang:1.22-bullseye
     steps:
       - test-linux:
           llvm: "15"
-          # "make lint" fails before go 1.21 because internal/tools/go.mod specifies packages that require go 1.21
-          fmt-check: false
     resource_class: large
   test-llvm20-go124:
     docker:
@@ -114,6 +112,6 @@ workflows:
     jobs:
       # This tests our lowest supported versions of Go and LLVM, to make sure at
       # least the smoke tests still pass.
-      - test-llvm15-go119
+      - test-llvm15-go122
       # This tests LLVM 20 support when linking against system libraries.
       - test-llvm20-go124
