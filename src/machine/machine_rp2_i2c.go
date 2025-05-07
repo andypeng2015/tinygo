@@ -86,10 +86,7 @@ func (i2c *I2C) Tx(addr uint16, w, r []byte) error {
 	if i2c.mode != I2CModeController {
 		return ErrI2CWrongMode
 	}
-
-	// timeout in microseconds.
-	const timeout = 40 * 1000 // 40ms is a reasonable time for a real-time system.
-	return i2c.tx(uint8(addr), w, r, timeout)
+	return i2c.tx(uint8(addr), w, r)
 }
 
 // Listen starts listening for I2C requests sent to specified address
@@ -218,8 +215,8 @@ func (i2c *I2C) enable() {
 //
 //go:inline
 func (i2c *I2C) disable() error {
-	const MAX_T_POLL_COUNT = 64 // 64 us timeout corresponds to around 1000kb/s i2c transfer rate.
-	deadline := ticks() + MAX_T_POLL_COUNT
+	const timeout_us = 4_000
+	deadline := ticks() + timeout_us
 	i2c.Bus.IC_ENABLE.Set(0)
 	for i2c.Bus.IC_ENABLE_STATUS.Get()&1 != 0 {
 		if ticks() > deadline {
@@ -285,7 +282,8 @@ func (i2c *I2C) deinit() (resetVal uint32) {
 }
 
 // tx performs blocking write followed by read to I2C bus.
-func (i2c *I2C) tx(addr uint8, tx, rx []byte, timeout_us uint64) (err error) {
+func (i2c *I2C) tx(addr uint8, tx, rx []byte) (err error) {
+	const timeout_us = 4_000
 	deadline := ticks() + timeout_us
 	if addr >= 0x80 || isReservedI2CAddr(addr) {
 		return ErrInvalidTgtAddr
@@ -338,7 +336,9 @@ func (i2c *I2C) tx(addr uint8, tx, rx []byte, timeout_us uint64) (err error) {
 				return errI2CWriteTimeout // If there was a timeout, don't attempt to do anything else.
 			}
 
+			before := ticks()
 			gosched()
+			deadline += ticks() - before
 		}
 
 		abortReason = i2c.getAbortReason()
@@ -361,7 +361,9 @@ func (i2c *I2C) tx(addr uint8, tx, rx []byte, timeout_us uint64) (err error) {
 					return errI2CWriteTimeout
 				}
 
+				before := ticks()
 				gosched()
+				deadline += ticks() - before
 			}
 			i2c.Bus.IC_CLR_STOP_DET.Get()
 		}
@@ -382,7 +384,9 @@ func (i2c *I2C) tx(addr uint8, tx, rx []byte, timeout_us uint64) (err error) {
 			first := rxCtr == 0
 			last := rxCtr == rxlen-1
 			for i2c.writeAvailable() == 0 {
+				before := ticks()
 				gosched()
+				deadline += ticks() - before
 			}
 			i2c.Bus.IC_DATA_CMD.Set(
 				boolToBit(first && rxStart)<<rp.I2C0_IC_DATA_CMD_RESTART_Pos |
@@ -399,7 +403,9 @@ func (i2c *I2C) tx(addr uint8, tx, rx []byte, timeout_us uint64) (err error) {
 					return errI2CReadTimeout // If there was a timeout, don't attempt to do anything else.
 				}
 
+				before := ticks()
 				gosched()
+				deadline += ticks() - before
 			}
 			if abort {
 				break
