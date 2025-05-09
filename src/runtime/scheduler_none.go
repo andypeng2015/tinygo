@@ -56,9 +56,9 @@ func addTimer(tim *timerNode) {
 	runtimePanic("timers not supported without a scheduler")
 }
 
-func removeTimer(tim *timer) bool {
+func removeTimer(tim *timer) *timerNode {
 	runtimePanic("timers not supported without a scheduler")
-	return false
+	return nil
 }
 
 func schedulerRunQueue() *task.Queue {

@@ -39,20 +39,17 @@ func timerQueueAdd(tn *timerNode) {
 	*q = tn
 }
 
-func timerQueueRemove(t *timer) bool {
-	removedTimer := false
+func timerQueueRemove(t *timer) *timerNode {
 	for q := &timerQueue; *q != nil; q = &(*q).next {
 		if (*q).timer == t {
 			scheduleLog("removed timer")
+			n := *q
 			*q = (*q).next
-			removedTimer = true
-			break
+			return n
 		}
 	}
-	if !removedTimer {
-		scheduleLog("did not remove timer")
-	}
-	return removedTimer
+	scheduleLog("did not remove timer")
+	return nil
 }
 
 // Goexit terminates the currently running goroutine. No other goroutines are affected.

@@ -110,11 +110,11 @@ func addTimer(tim *timerNode) {
 	timerQueueLock.Unlock()
 }
 
-func removeTimer(tim *timer) bool {
+func removeTimer(tim *timer) *timerNode {
 	timerQueueLock.Lock()
-	removed := timerQueueRemove(tim)
+	n := timerQueueRemove(tim)
 	timerQueueLock.Unlock()
-	return removed
+	return n
 }
 
 func schedulerRunQueue() *task.Queue {
