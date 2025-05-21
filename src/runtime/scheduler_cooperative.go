@@ -116,7 +116,7 @@ func addTimer(tim *timerNode) {
 }
 
 // removeTimer is the implementation of time.stopTimer. It removes a timer from
-// the timer queue, returning true if the timer is present in the timer queue.
+// the timer queue, returning it if the timer is present in the timer queue.
 func removeTimer(tim *timer) *timerNode {
 	mask := interrupt.Disable()
 	n := timerQueueRemove(tim)
