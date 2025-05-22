@@ -2029,3 +2029,62 @@ func checkFlashError() error {
 
 	return nil
 }
+
+// Watchdog provides access to the hardware watchdog available
+// in the SAMD21.
+var Watchdog = &watchdogImpl{}
+
+const (
+	// WatchdogMaxTimeout in milliseconds (16s)
+	WatchdogMaxTimeout = (16384 * 1000) / 1024
+)
+
+type watchdogImpl struct{}
+
+// Configure the watchdog.
+//
+// This method should not be called after the watchdog is started and on
+// some platforms attempting to reconfigure after starting the watchdog
+// is explicitly forbidden / will not work.
+func (wd *watchdogImpl) Configure(config WatchdogConfig) error {
+	// Use OSCULP32K as source for Generic Clock Generator 8, divided by 32 to get 1.024kHz
+	sam.GCLK.GENDIV.Set(sam.GCLK_CLKCTRL_GEN_GCLK8 | (32 << sam.GCLK_GENDIV_DIV_Pos))
+	sam.GCLK.GENCTRL.Set(sam.GCLK_CLKCTRL_GEN_GCLK8 | (sam.GCLK_GENCTRL_SRC_OSCULP32K << sam.GCLK_GENCTRL_SRC_Pos) | sam.GCLK_GENCTRL_GENEN)
+	waitForSync()
+
+	// Use GCLK8 for watchdog
+	sam.GCLK.CLKCTRL.Set(sam.GCLK_CLKCTRL_ID_WDT | (sam.GCLK_CLKCTRL_GEN_GCLK8 << sam.GCLK_CLKCTRL_GEN_Pos) | sam.GCLK_CLKCTRL_CLKEN)
+
+	// Power on the watchdog peripheral
+	sam.PM.APBAMASK.SetBits(sam.PM_APBAMASK_WDT_)
+
+	// 1.024kHz clock
+	cycles := int((int64(config.TimeoutMillis) * 1024) / 1000)
+
+	// period is expressed as a power-of-two, starting at 8 / 1024ths of a second
+	period := uint8(0)
+	cfgCycles := 8
+	for cfgCycles < cycles {
+		period++
+		cfgCycles <<= 1
+
+		if period >= 0xB {
+			break
+		}
+	}
+
+	sam.WDT.CONFIG.Set(period << sam.WDT_CONFIG_PER_Pos)
+
+	return nil
+}
+
+// Starts the watchdog.
+func (wd *watchdogImpl) Start() error {
+	sam.WDT.CTRL.SetBits(sam.WDT_CTRL_ENABLE)
+	return nil
+}
+
+// Update the watchdog, indicating that `source` is healthy.
+func (wd *watchdogImpl) Update() {
+	sam.WDT.CLEAR.Set(sam.WDT_CLEAR_CLEAR_KEY)
+}

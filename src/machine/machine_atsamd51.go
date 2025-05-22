@@ -2354,6 +2354,5 @@ func (wd *watchdogImpl) Start() error {
 
 // Update the watchdog, indicating that `source` is healthy.
 func (wd *watchdogImpl) Update() {
-	// 0xA5 = magic value (see datasheet)
-	sam.WDT.CLEAR.Set(0xA5)
+	sam.WDT.CLEAR.Set(sam.WDT_CLEAR_CLEAR_KEY)
 }
