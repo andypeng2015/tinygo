@@ -34,7 +34,7 @@
   inputs = {
     # Use a recent stable release, but fix the version to make it reproducible.
     # This version should be updated from time to time.
-    nixpkgs.url = "nixpkgs/nixos-24.05";
+    nixpkgs.url = "nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }:
@@ -48,11 +48,11 @@
           buildInputs = [
             # These dependencies are required for building tinygo (go install).
             go
-            llvmPackages_18.llvm
-            llvmPackages_18.libclang
+            llvmPackages_20.llvm
+            llvmPackages_20.libclang
             # Additional dependencies needed at runtime, for building and/or
             # flashing.
-            llvmPackages_18.lld
+            llvmPackages_20.lld
             avrdude
             binaryen
             # Additional dependencies needed for on-chip debugging.
@@ -67,8 +67,11 @@
             # has `md5sum`).
             export MD5SUM=md5sum
 
+            # Work around #4819, missing support for generic type aliases.
+            export GODEBUG=gotypesalias=0
+
             # Ugly hack to make the Clang resources directory available.
-            export GOFLAGS="\"-ldflags=-X github.com/tinygo-org/tinygo/goenv.clangResourceDir=${llvmPackages_18.clang.cc.lib}/lib/clang/18\" -tags=llvm18"
+            export GOFLAGS="\"-ldflags=-X github.com/tinygo-org/tinygo/goenv.clangResourceDir=${llvmPackages_20.clang.cc.lib}/lib/clang/20\" -tags=llvm20"
           '';
         };
       }
