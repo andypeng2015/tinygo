@@ -389,7 +389,7 @@ func (c *compilerContext) getLLVMType(goType types.Type) llvm.Type {
 // makeLLVMType creates a LLVM type for a Go type. Don't call this, use
 // getLLVMType instead.
 func (c *compilerContext) makeLLVMType(goType types.Type) llvm.Type {
-	switch typ := goType.(type) {
+	switch typ := types.Unalias(goType).(type) {
 	case *types.Array:
 		elemType := c.getLLVMType(typ.Elem())
 		return llvm.ArrayType(elemType, int(typ.Len()))
@@ -497,6 +497,21 @@ func (c *compilerContext) createDIType(typ types.Type) llvm.Metadata {
 	llvmType := c.getLLVMType(typ)
 	sizeInBytes := c.targetData.TypeAllocSize(llvmType)
 	switch typ := typ.(type) {
+	case *types.Alias:
+		// Implement types.Alias just like types.Named: by treating them like a
+		// C typedef.
+		temporaryMDNode := c.dibuilder.CreateReplaceableCompositeType(llvm.Metadata{}, llvm.DIReplaceableCompositeType{
+			Tag:         dwarf.TagTypedef,
+			SizeInBits:  sizeInBytes * 8,
+			AlignInBits: uint32(c.targetData.ABITypeAlignment(llvmType)) * 8,
+		})
+		c.ditypes[typ] = temporaryMDNode
+		md := c.dibuilder.CreateTypedef(llvm.DITypedef{
+			Type: c.getDIType(types.Unalias(typ)), // TODO: use typ.Rhs in Go 1.23
+			Name: typ.String(),
+		})
+		temporaryMDNode.ReplaceAllUsesWith(md)
+		return md
 	case *types.Array:
 		return c.dibuilder.CreateArrayType(llvm.DIArrayType{
 			SizeInBits:  sizeInBytes * 8,
@@ -857,6 +872,11 @@ func (c *compilerContext) createPackage(irbuilder llvm.Builder, pkg *ssa.Package
 		case *ssa.Type:
 			if types.IsInterface(member.Type()) {
 				// Interfaces don't have concrete methods.
+				continue
+			}
+			if _, isalias := member.Type().(*types.Alias); isalias {
+				// Aliases don't need to be redefined, since they just refer to
+				// an already existing type whose methods will be defined.
 				continue
 			}
 

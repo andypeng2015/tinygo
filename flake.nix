@@ -67,9 +67,6 @@
             # has `md5sum`).
             export MD5SUM=md5sum
 
-            # Work around #4819, missing support for generic type aliases.
-            export GODEBUG=gotypesalias=0
-
             # Ugly hack to make the Clang resources directory available.
             export GOFLAGS="\"-ldflags=-X github.com/tinygo-org/tinygo/goenv.clangResourceDir=${llvmPackages_20.clang.cc.lib}/lib/clang/20\" -tags=llvm20"
           '';
