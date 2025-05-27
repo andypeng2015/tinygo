@@ -837,6 +837,8 @@ ifneq ($(STM32), 0)
 	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=mksnanov3           examples/blinky1
 	@$(MD5SUM) test.hex
+	$(TINYGO) build -size short -o test.hex -target=stm32l0x1           examples/serial
+	@$(MD5SUM) test.hex
 endif
 	$(TINYGO) build -size short -o test.hex -target=atmega328pb         examples/blinkm
 	@$(MD5SUM) test.hex
@@ -907,7 +909,7 @@ endif
 	$(TINYGO) build -size short -o test.hex -target=hw-651              examples/machinetest
 	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=hw-651-s110v8       examples/machinetest
-	@$(MD5SUM) test.hex	
+	@$(MD5SUM) test.hex
 ifneq ($(WASM), 0)
 	$(TINYGO) build -size short -o wasm.wasm -target=wasm               examples/wasm/export
 	$(TINYGO) build -size short -o wasm.wasm -target=wasm               examples/wasm/main
