@@ -529,3 +529,7 @@ func FuncOf(in, out []Type, variadic bool) Type {
 
 	return toType(reflectlite.FuncOf(rawIn, rawOut, variadic))
 }
+
+func ChanOf(dir ChanDir, t Type) Type {
+	panic("unimplemented: reflect.ChanOf")
+}
