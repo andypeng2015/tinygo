@@ -630,6 +630,8 @@ endif
 	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=nrf52840-mdk        examples/blinky1
 	@$(MD5SUM) test.hex
+	$(TINYGO) build -size short -o test.hex -target=btt-skr-pico        examples/uart
+	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=pca10031            examples/blinky1
 	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=reelboard           examples/blinky1
