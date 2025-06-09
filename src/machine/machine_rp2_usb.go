@@ -8,11 +8,24 @@ import (
 	"unsafe"
 )
 
+const NumberOfUSBEndpoints = 8
+
 var (
 	sendOnEP0DATADONE struct {
 		offset int
 		data   []byte
 		pid    uint32
+	}
+
+	endPoints = []uint32{
+		usb.CONTROL_ENDPOINT:  usb.ENDPOINT_TYPE_CONTROL,
+		usb.CDC_ENDPOINT_ACM:  (usb.ENDPOINT_TYPE_INTERRUPT | usb.EndpointIn),
+		usb.CDC_ENDPOINT_OUT:  (usb.ENDPOINT_TYPE_BULK | usb.EndpointOut),
+		usb.CDC_ENDPOINT_IN:   (usb.ENDPOINT_TYPE_BULK | usb.EndpointIn),
+		usb.HID_ENDPOINT_IN:   (usb.ENDPOINT_TYPE_DISABLE), // Interrupt In
+		usb.HID_ENDPOINT_OUT:  (usb.ENDPOINT_TYPE_DISABLE), // Interrupt Out
+		usb.MIDI_ENDPOINT_IN:  (usb.ENDPOINT_TYPE_DISABLE), // Bulk In
+		usb.MIDI_ENDPOINT_OUT: (usb.ENDPOINT_TYPE_DISABLE), // Bulk Out
 	}
 )
 
@@ -116,6 +129,7 @@ func handleEndpointRx(ep uint32) []byte {
 }
 
 func handleEndpointRxComplete(ep uint32) {
+	ep = ep & 0x7F
 	setEPDataPID(ep, !epXdata0[ep])
 }
 
@@ -152,23 +166,25 @@ func sendViaEPIn(ep uint32, data []byte, count int) {
 
 // Set ENDPOINT_HALT/stall status on a USB IN endpoint.
 func (dev *USBDevice) SetStallEPIn(ep uint32) {
+	ep = ep & 0x7F
 	// Prepare buffer control register value
 	if ep == 0 {
 		armEPZeroStall()
 	}
 	val := uint32(usbBuf0CtrlFull)
-	_usbDPSRAM.EPxBufferControl[ep&0x7F].In.Set(val)
+	_usbDPSRAM.EPxBufferControl[ep].In.Set(val)
 	val |= uint32(usbBuf0CtrlStall)
-	_usbDPSRAM.EPxBufferControl[ep&0x7F].In.Set(val)
+	_usbDPSRAM.EPxBufferControl[ep].In.Set(val)
 }
 
 // Set ENDPOINT_HALT/stall status on a USB OUT endpoint.
 func (dev *USBDevice) SetStallEPOut(ep uint32) {
+	ep = ep & 0x7F
 	if ep == 0 {
 		panic("SetStallEPOut: EP0 OUT not valid")
 	}
 	val := uint32(usbBuf0CtrlStall)
-	_usbDPSRAM.EPxBufferControl[ep&0x7F].Out.Set(val)
+	_usbDPSRAM.EPxBufferControl[ep].Out.Set(val)
 }
 
 // Clear the ENDPOINT_HALT/stall on a USB IN endpoint.
@@ -178,7 +194,7 @@ func (dev *USBDevice) ClearStallEPIn(ep uint32) {
 	_usbDPSRAM.EPxBufferControl[ep].In.ClearBits(val)
 	if epXPIDReset[ep] {
 		// Reset the PID to DATA0
-		setEPDataPID(ep&0x7F, false)
+		setEPDataPID(ep, false)
 	}
 }
 
