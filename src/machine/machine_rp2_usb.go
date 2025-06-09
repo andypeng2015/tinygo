@@ -128,7 +128,8 @@ func handleEndpointRx(ep uint32) []byte {
 	return _usbDPSRAM.EPxBuffer[ep].Buffer0[:sz]
 }
 
-func handleEndpointRxComplete(ep uint32) {
+// AckUsbOutTransfer is called to acknowledge the completion of a USB OUT transfer.
+func AckUsbOutTransfer(ep uint32) {
 	ep = ep & 0x7F
 	setEPDataPID(ep, !epXdata0[ep])
 }

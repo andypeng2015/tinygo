@@ -194,10 +194,9 @@ func handleUSBIRQ(intr interrupt.Interrupt) {
 		setEPINTFLAG(i, epFlags)
 		if (epFlags & sam.USB_DEVICE_EPINTFLAG_TRCPT0) > 0 {
 			buf := handleEndpointRx(i)
-			if usbRxHandler[i] != nil {
-				usbRxHandler[i](buf)
+			if usbRxHandler[i] == nil || usbRxHandler[i](buf) {
+				AckUsbOutTransfer(i)
 			}
-			handleEndpointRxComplete(i)
 		} else if (epFlags & sam.USB_DEVICE_EPINTFLAG_TRCPT1) > 0 {
 			if usbTxHandler[i] != nil {
 				usbTxHandler[i]()
@@ -417,7 +416,8 @@ func handleEndpointRx(ep uint32) []byte {
 	return udd_ep_out_cache_buffer[ep][:count]
 }
 
-func handleEndpointRxComplete(ep uint32) {
+// AckUsbOutTransfer is called to acknowledge the completion of a USB OUT transfer.
+func AckUsbOutTransfer(ep uint32) {
 	// set byte count to zero
 	usbEndpointDescriptors[ep].DeviceDescBank[0].PCKSIZE.ClearBits(usb_DEVICE_PCKSIZE_BYTE_COUNT_Mask << usb_DEVICE_PCKSIZE_BYTE_COUNT_Pos)
 

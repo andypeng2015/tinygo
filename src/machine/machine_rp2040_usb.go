@@ -95,10 +95,9 @@ func handleUSBIRQ(intr interrupt.Interrupt) {
 		for i := 0; i < 16; i++ {
 			if s2&(1<<(i*2+1)) > 0 {
 				buf := handleEndpointRx(uint32(i))
-				if usbRxHandler[i] != nil {
-					usbRxHandler[i](buf)
+				if usbRxHandler[i] == nil || usbRxHandler[i](buf) {
+					AckUsbOutTransfer(uint32(i))
 				}
-				handleEndpointRxComplete(uint32(i))
 			}
 		}
 

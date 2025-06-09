@@ -319,7 +319,12 @@ func ConfigureUSBEndpoint(desc descriptor.Descriptor, epSettings []usb.EndpointC
 		} else {
 			endPoints[ep.Index] = uint32(ep.Type | usb.EndpointOut)
 			if ep.RxHandler != nil {
-				usbRxHandler[ep.Index] = ep.RxHandler
+				usbRxHandler[ep.Index] = func(b []byte) bool {
+					ep.RxHandler(b)
+					return true
+				}
+			} else if ep.DelayRxHandler != nil {
+				usbRxHandler[ep.Index] = ep.DelayRxHandler
 			}
 		}
 		if ep.StallHandler != nil {

@@ -206,10 +206,9 @@ func handleUSBIRQ(interrupt.Interrupt) {
 		if nrf.USBD.EVENTS_ENDEPOUT[i].Get() > 0 {
 			nrf.USBD.EVENTS_ENDEPOUT[i].Set(0)
 			buf := handleEndpointRx(uint32(i))
-			if usbRxHandler[i] != nil {
-				usbRxHandler[i](buf)
+			if usbRxHandler[i] == nil || usbRxHandler[i](buf) {
+				AckUsbOutTransfer(uint32(i))
 			}
-			handleEndpointRxComplete(uint32(i))
 			exitCriticalSection()
 		}
 	}
@@ -304,7 +303,8 @@ func handleEndpointRx(ep uint32) []byte {
 	return udd_ep_out_cache_buffer[ep][:count]
 }
 
-func handleEndpointRxComplete(ep uint32) {
+// AckUsbOutTransfer is called to acknowledge the completion of a USB OUT transfer.
+func AckUsbOutTransfer(ep uint32) {
 	// set ready for next data
 	nrf.USBD.SIZE.EPOUT[ep].Set(0)
 }
