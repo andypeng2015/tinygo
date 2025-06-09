@@ -794,6 +794,10 @@ endif
 	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=feather-nrf52840    examples/usb-midi
 	@$(MD5SUM) test.hex
+	$(TINYGO) build -size short -o test.hex -target=pico    			examples/usb-storage
+	@$(MD5SUM) test.hex
+	$(TINYGO) build -size short -o test.hex -target=pico2    			examples/usb-storage
+	@$(MD5SUM) test.hex
 	$(TINYGO) build -size short -o test.hex -target=nrf52840-s140v6-uf2-generic	examples/machinetest
 	@$(MD5SUM) test.hex
 ifneq ($(STM32), 0)
