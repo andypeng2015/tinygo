@@ -63,6 +63,11 @@ func strlen(ptr unsafe.Pointer) uintptr
 //export malloc
 func malloc(size uintptr) unsafe.Pointer
 
+// Return the address of an exported function.
+// This is mainly useful to pass a function pointer without extra context
+// parameter to C, for example.
+func exportedFuncPtr(fn func()) uintptr
+
 // Compare two same-size buffers for equality.
 func memequal(x, y unsafe.Pointer, n uintptr) bool {
 	for i := uintptr(0); i < n; i++ {

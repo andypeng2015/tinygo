@@ -1856,15 +1856,7 @@ func (b *builder) createBuiltin(argTypes []types.Type, argValues []llvm.Value, c
 //
 // This is also where compiler intrinsics are implemented.
 func (b *builder) createFunctionCall(instr *ssa.CallCommon) (llvm.Value, error) {
-	var params []llvm.Value
-	for _, param := range instr.Args {
-		params = append(params, b.getValue(param, getPos(instr)))
-	}
-
-	// Try to call the function directly for trivially static calls.
-	var callee, context llvm.Value
-	var calleeType llvm.Type
-	exported := false
+	// See if this is an intrinsic function that is handled specially.
 	if fn := instr.StaticCallee(); fn != nil {
 		// Direct function call, either to a named or anonymous (directly
 		// applied) function call. If it is anonymous, it may be a closure.
@@ -1900,13 +1892,27 @@ func (b *builder) createFunctionCall(instr *ssa.CallCommon) (llvm.Value, error) 
 			return llvm.ConstInt(b.ctx.Int8Type(), panicStrategy, false), nil
 		case name == "runtime/interrupt.New":
 			return b.createInterruptGlobal(instr)
+		case name == "runtime.exportedFuncPtr":
+			_, ptr := b.getFunction(instr.Args[0].(*ssa.Function))
+			return b.CreatePtrToInt(ptr, b.uintptrType, ""), nil
 		case name == "internal/abi.FuncPCABI0":
 			retval := b.createDarwinFuncPCABI0Call(instr)
 			if !retval.IsNil() {
 				return retval, nil
 			}
 		}
+	}
 
+	var params []llvm.Value
+	for _, param := range instr.Args {
+		params = append(params, b.getValue(param, getPos(instr)))
+	}
+
+	// Try to call the function directly for trivially static calls.
+	var callee, context llvm.Value
+	var calleeType llvm.Type
+	exported := false
+	if fn := instr.StaticCallee(); fn != nil {
 		calleeType, callee = b.getFunction(fn)
 		info := b.getFunctionInfo(fn)
 		if callee.IsNil() {
