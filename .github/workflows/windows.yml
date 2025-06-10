@@ -23,7 +23,7 @@ jobs:
           minimum-size: 8GB
           maximum-size: 24GB
           disk-root: "C:"
-      - uses: brechtm/setup-scoop@v2
+      - uses: MinoruSekine/setup-scoop@v4
         with:
           scoop_update: 'false'
       - name: Install Dependencies
@@ -135,7 +135,7 @@ jobs:
           minimum-size: 8GB
           maximum-size: 24GB
           disk-root: "C:"
-      - uses: brechtm/setup-scoop@v2
+      - uses: MinoruSekine/setup-scoop@v4
         with:
           scoop_update: 'false'
       - name: Install Dependencies
@@ -201,7 +201,7 @@ jobs:
           minimum-size: 8GB
           maximum-size: 24GB
           disk-root: "C:"
-      - uses: brechtm/setup-scoop@v2
+      - uses: MinoruSekine/setup-scoop@v4
         with:
           scoop_update: 'false'
       - name: Install Dependencies
