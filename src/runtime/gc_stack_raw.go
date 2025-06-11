@@ -20,7 +20,7 @@ func markStack() {
 
 	if !task.OnSystemStack() {
 		// Mark system stack.
-		markRoots(getSystemStackPointer(), stackTop)
+		markRoots(task.SystemStack(), stackTop)
 	}
 }
 

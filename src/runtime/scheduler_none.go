@@ -73,9 +73,3 @@ func scheduler(returnAtDeadlock bool) {
 	// this code should be unreachable.
 	runtimePanic("unreachable: scheduler must not be called with the 'none' scheduler")
 }
-
-// getSystemStackPointer returns the current stack pointer of the system stack.
-// This is always the current stack pointer.
-func getSystemStackPointer() uintptr {
-	return getCurrentStackPointer()
-}
