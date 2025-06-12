@@ -14,6 +14,24 @@ var gcScanState atomic.Uint32
 // Start GC scan by pausing the world (all other cores) and scanning their
 // stacks. It doesn't resume the world.
 func gcMarkReachable() {
+	// If the other cores haven't started yet (for example, when a GC cycle
+	// happens during init()), we only need to scan the stack of the current
+	// core.
+	if !secondaryCoresStarted {
+		// Scan the stack(s) of the current core.
+		scanCurrentStack()
+		if !task.OnSystemStack() {
+			// Mark system stack.
+			markRoots(task.SystemStack(), stackTop)
+		}
+
+		// Scan globals.
+		findGlobals(markRoots)
+
+		// Nothing more to do: the other cores haven't started yet.
+		return
+	}
+
 	core := currentCPU()
 
 	// Interrupt all other cores.
@@ -81,6 +99,11 @@ func scanstack(sp uintptr) {
 
 // Resume the world after a call to gcMarkReachable.
 func gcResumeWorld() {
+	if !secondaryCoresStarted {
+		// Nothing to do: the world wasn't stopped in gcMarkReachable.
+		return
+	}
+
 	// Signal each core that they can resume.
 	hartID := currentCPU()
 	for i := uint32(0); i < numCPU; i++ {

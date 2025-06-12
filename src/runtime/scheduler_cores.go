@@ -14,6 +14,9 @@ const hasParallelism = true
 
 var mainExited atomic.Uint32
 
+// True after the secondary cores have started.
+var secondaryCoresStarted bool
+
 // Which task is running on a given core (or nil if there is no task running on
 // the core).
 var cpuTasks [numCPU]*task.Task
@@ -141,6 +144,7 @@ func run() {
 
 		// After package initializers have finished, start all the other cores.
 		startSecondaryCores()
+		secondaryCoresStarted = true
 
 		// Run main.main.
 		callMain()
