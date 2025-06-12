@@ -303,7 +303,16 @@ func systemStackPtr() *uintptr {
 const cpuColoredPrint = false
 
 func printlock() {
-	printLock.Lock()
+	// Don't lock the print output inside an interrupt.
+	// Locking the print output inside an interrupt can lead to a deadlock: if
+	// the interrupt happens while the print lock is held, the interrupt won't
+	// be able to take this lock anymore.
+	// This isn't great, but the alternative would be to disable interrupts
+	// while printing which seems like a worse idea to me.
+	if !interrupt.In() {
+		printLock.Lock()
+	}
+
 	if cpuColoredPrint {
 		switch currentCPU() {
 		case 1:
@@ -322,5 +331,8 @@ func printunlock() {
 			printstring("\x1b[0m") // reset colored output
 		}
 	}
-	printLock.Unlock()
+
+	if !interrupt.In() {
+		printLock.Unlock()
+	}
 }
