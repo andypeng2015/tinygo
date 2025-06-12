@@ -56,7 +56,7 @@ func gcMarkReachable() {
 	// Busy-wait until all the other cores are ready. They certainly should be,
 	// after the scanning we did above.
 	for gcScanState.Load() != numCPU {
-		spinLoopHint()
+		spinLoopWait()
 	}
 	gcScanState.Store(0)
 
@@ -71,7 +71,7 @@ func gcMarkReachable() {
 
 		// Busy-wait until this core finished scanning.
 		for gcScanState.Load() == 0 {
-			spinLoopHint()
+			spinLoopWait()
 		}
 		gcScanState.Store(0)
 	}
@@ -118,7 +118,7 @@ func gcResumeWorld() {
 	// Busy-wait until the core acknowledges the signal (and is going to return
 	// from the interrupt handler).
 	for gcScanState.Load() != numCPU-1 {
-		spinLoopHint()
+		spinLoopWait()
 	}
 	gcScanState.Store(0)
 }

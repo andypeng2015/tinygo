@@ -360,7 +360,7 @@ type spinLock struct {
 func (l *spinLock) Lock() {
 	// Try to replace 0 with 1. Once we succeed, the lock has been acquired.
 	for !l.Uint32.CompareAndSwap(0, 1) {
-		spinLoopHint()
+		spinLoopWait()
 	}
 }
 
@@ -376,7 +376,7 @@ func (l *spinLock) Unlock() {
 
 // Hint to the CPU that this core is just waiting, and the core can go into a
 // lower energy state.
-func spinLoopHint() {
+func spinLoopWait() {
 	// This is a no-op in QEMU TCG (but added here for completeness):
 	// https://github.com/qemu/qemu/blob/v9.2.3/target/riscv/insn_trans/trans_rvi.c.inc#L856
 	riscv.Asm("pause")
