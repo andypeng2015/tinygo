@@ -87,6 +87,11 @@ func Gosched() {
 	task.PauseLocked()
 }
 
+// NumCPU returns the number of CPU cores on this system.
+func NumCPU() int {
+	return numCPU
+}
+
 func addTimer(tn *timerNode) {
 	schedulerLock.Lock()
 	timerQueueAdd(tn)
