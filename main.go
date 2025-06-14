@@ -1013,15 +1013,50 @@ func findFATMounts(options *compileopts.Options) ([]mountPoint, error) {
 			return nil, fmt.Errorf("could not list mount points: %w", err)
 		}
 		for _, elem := range list {
-			// TODO: find a way to check for the filesystem type.
-			// (Only return FAT filesystems).
-			points = append(points, mountPoint{
-				name: elem.Name(),
-				path: filepath.Join("/Volumes", elem.Name()),
-			})
+			volumePath := filepath.Join("/Volumes", elem.Name())
+			if _, err := os.Stat(volumePath); err != nil {
+				continue
+			}
+
+			cmd := exec.Command("diskutil", "info", volumePath)
+			var out bytes.Buffer
+			cmd.Stdout = &out
+			if err := cmd.Run(); err != nil {
+				continue // skip if diskutil failed
+			}
+
+			diskInfo := map[string]string{}
+			scanner := bufio.NewScanner(&out)
+			for scanner.Scan() {
+				line := scanner.Text()
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) != 2 {
+					continue
+				}
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				diskInfo[key] = value
+			}
+			if err := scanner.Err(); err != nil {
+				continue
+			}
+
+			volName, okv := diskInfo["Volume Name"]
+			fsType, okf := diskInfo["File System Personality"]
+			if !okv || !okf {
+				continue
+			}
+
+			// Check if a filesystem type is FAT-based
+			if strings.Contains(strings.ToUpper(fsType), "FAT") {
+				points = append(points, mountPoint{
+					name: volName,
+					path: volumePath,
+				})
+			}
 		}
 		sort.Slice(points, func(i, j int) bool {
-			return points[i].path < points[j].name
+			return points[i].path < points[j].path
 		})
 		return points, nil
 	case "linux":
