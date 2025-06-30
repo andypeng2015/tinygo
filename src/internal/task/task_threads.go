@@ -220,7 +220,7 @@ func gcScanGlobals()
 var stackScanLock PMutex
 
 //export tinygo_task_gc_pause
-func tingyo_task_gc_pause() {
+func tingyo_task_gc_pause(sig int32) {
 	// Wait until we get the signal to start scanning the stack.
 	Current().state.gcSem.Wait()
 
