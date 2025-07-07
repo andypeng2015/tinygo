@@ -37,6 +37,9 @@ var (
 	errI2COverflow           = errors.New("I2C receive buffer overflow")
 	errI2COverread           = errors.New("I2C transmit buffer overflow")
 	errI2CNotImplemented     = errors.New("I2C operation not yet implemented")
+	errI2CNoDevices          = errors.New("i2c: bus has no devices")                         // simulator only
+	errI2CMultipleDevices    = errors.New("i2c: bus has address conflict")                   // simulator only
+	errI2CWrongAddress       = errors.New("i2c: bus has devices but none with this address") // simulator only
 )
 
 // I2CTargetEvent reflects events on the I2C bus
