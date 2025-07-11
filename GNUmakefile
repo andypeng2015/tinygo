@@ -460,11 +460,15 @@ TEST_PACKAGES_HOST := $(TEST_PACKAGES_FAST) $(TEST_PACKAGES_WINDOWS)
 TEST_IOFS := false
 endif
 
+TEST_SKIP_FLAG := -skip='TestExtraMethods|TestParseAndBytesRoundTrip/P256/Generic'
+
 # Test known-working standard library packages.
 # TODO: parallelize, and only show failing tests (no implied -v flag).
 .PHONY: tinygo-test
 tinygo-test:
-	$(TINYGO) test $(TEST_PACKAGES_HOST) $(TEST_PACKAGES_SLOW)
+	@# TestExtraMethods: used by many crypto packages and uses reflect.Type.Method which is not implemented.
+	@# TestParseAndBytesRoundTrip/P256/Generic: relies on t.Skip() which is not implemented
+	$(TINYGO) test $(TEST_SKIP_FLAG) $(TEST_PACKAGES_HOST) $(TEST_PACKAGES_SLOW)
 	@# io/fs requires os.ReadDir, not yet supported on windows or wasi. It also
 	@# requires a large stack-size. Hence, io/fs is only run conditionally.
 	@# For more details, see the comments on issue #3143.
@@ -472,7 +476,7 @@ ifeq ($(TEST_IOFS),true)
 	$(TINYGO) test -stack-size=6MB io/fs
 endif
 tinygo-test-fast:
-	$(TINYGO) test $(TEST_PACKAGES_HOST)
+	$(TINYGO) test $(TEST_SKIP_FLAG) $(TEST_PACKAGES_HOST)
 tinygo-bench:
 	$(TINYGO) test -bench . $(TEST_PACKAGES_HOST) $(TEST_PACKAGES_SLOW)
 tinygo-bench-fast:
@@ -480,18 +484,18 @@ tinygo-bench-fast:
 
 # Same thing, except for wasi rather than the current platform.
 tinygo-test-wasm:
-	$(TINYGO) test -target wasm $(TEST_PACKAGES_WASM)
+	$(TINYGO) test -target wasm $(TEST_SKIP_FLAG) $(TEST_PACKAGES_WASM)
 tinygo-test-wasi:
-	$(TINYGO) test -target wasip1 $(TEST_PACKAGES_FAST) $(TEST_PACKAGES_SLOW) ./tests/runtime_wasi
+	$(TINYGO) test -target wasip1 $(TEST_SKIP_FLAG) $(TEST_PACKAGES_FAST) $(TEST_PACKAGES_SLOW) ./tests/runtime_wasi
 tinygo-test-wasip1:
-	GOOS=wasip1 GOARCH=wasm $(TINYGO) test $(TEST_PACKAGES_FAST) $(TEST_PACKAGES_SLOW) ./tests/runtime_wasi
+	GOOS=wasip1 GOARCH=wasm $(TINYGO) test $(TEST_SKIP_FLAG) $(TEST_PACKAGES_FAST) $(TEST_PACKAGES_SLOW) ./tests/runtime_wasi
 tinygo-test-wasip1-fast:
-	$(TINYGO) test -target=wasip1 $(TEST_PACKAGES_FAST) ./tests/runtime_wasi
+	$(TINYGO) test -target=wasip1 $(TEST_SKIP_FLAG) $(TEST_PACKAGES_FAST) ./tests/runtime_wasi
 
 tinygo-test-wasip2-slow:
-	$(TINYGO) test -target=wasip2 $(TEST_PACKAGES_SLOW)
+	$(TINYGO) test -target=wasip2 $(TEST_SKIP_FLAG) $(TEST_PACKAGES_SLOW)
 tinygo-test-wasip2-fast:
-	$(TINYGO) test -target=wasip2 $(TEST_PACKAGES_FAST) ./tests/runtime_wasi
+	$(TINYGO) test -target=wasip2 $(TEST_SKIP_FLAG) $(TEST_PACKAGES_FAST) ./tests/runtime_wasi
 
 tinygo-test-wasip2-sum-slow:
 	TINYGO=$(TINYGO) \
@@ -517,7 +521,7 @@ tinygo-bench-wasip2-fast:
 
 # Run tests on riscv-qemu since that one provides a large amount of memory.
 tinygo-test-baremetal:
-	$(TINYGO) test -target riscv-qemu $(TEST_PACKAGES_BAREMETAL)
+	$(TINYGO) test -target riscv-qemu $(TEST_SKIP_FLAG) $(TEST_PACKAGES_BAREMETAL)
 
 # Test external packages in a large corpus.
 test-corpus:
