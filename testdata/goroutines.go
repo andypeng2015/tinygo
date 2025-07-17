@@ -175,10 +175,13 @@ func testGoOnBuiltins() {
 
 var once sync.Once
 
+var waitChan = make(chan struct{})
+
 func testGoOnInterface(f Itf) {
 	go f.Nowait()
 	time.Sleep(time.Millisecond)
 	go f.Wait()
+	<-waitChan
 	time.Sleep(time.Millisecond * 2)
 	println("done with 'go on interface'")
 }
@@ -204,6 +207,7 @@ func (f Foo) Nowait() {
 
 func (f Foo) Wait() {
 	println("called: Foo.Wait")
+	close(waitChan)
 	time.Sleep(time.Microsecond)
 	println("  ...waited")
 }
