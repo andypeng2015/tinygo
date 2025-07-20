@@ -963,6 +963,7 @@ build/release: tinygo gen-device $(if $(filter 1,$(USE_SYSTEM_BINARYEN)),,binary
 	@mkdir -p build/release/tinygo/lib/nrfx
 	@mkdir -p build/release/tinygo/lib/picolibc/newlib/libc
 	@mkdir -p build/release/tinygo/lib/picolibc/newlib/libm
+	@mkdir -p build/release/tinygo/lib/wasi-libc/dlmalloc
 	@mkdir -p build/release/tinygo/lib/wasi-libc/libc-bottom-half
 	@mkdir -p build/release/tinygo/lib/wasi-libc/libc-top-half/musl/arch
 	@mkdir -p build/release/tinygo/lib/wasi-libc/libc-top-half/musl/src
@@ -1034,6 +1035,7 @@ endif
 	@cp -rp lib/picolibc/newlib/libm/common      build/release/tinygo/lib/picolibc/newlib/libm
 	@cp -rp lib/picolibc/newlib/libm/math        build/release/tinygo/lib/picolibc/newlib/libm
 	@cp -rp lib/picolibc-stdio.c         build/release/tinygo/lib
+	@cp -rp lib/wasi-libc/dlmalloc/src                              build/release/tinygo/lib/wasi-libc/dlmalloc
 	@cp -rp lib/wasi-libc/libc-bottom-half/cloudlibc                build/release/tinygo/lib/wasi-libc/libc-bottom-half
 	@cp -rp lib/wasi-libc/libc-bottom-half/headers                  build/release/tinygo/lib/wasi-libc/libc-bottom-half
 	@cp -rp lib/wasi-libc/libc-bottom-half/sources                  build/release/tinygo/lib/wasi-libc/libc-bottom-half
