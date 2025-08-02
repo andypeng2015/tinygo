@@ -189,7 +189,7 @@ func LoadTarget(options *Options) (*TargetSpec, error) {
 		case "wasip2":
 			options.Target = "wasip2"
 		default:
-			return nil, errors.New("GOARCH=wasm but GOOS is not set correctly. Please set GOOS to wasm, wasip1, or wasip2.")
+			return nil, errors.New("GOARCH=wasm but GOOS is not set correctly. Please set GOOS to js, wasip1, or wasip2.")
 		}
 	}
 
@@ -369,7 +369,7 @@ func defaultTarget(options *Options) (*TargetSpec, error) {
 			return nil, fmt.Errorf("invalid GOMIPS=%s: must be hardfloat or softfloat", options.GOMIPS)
 		}
 	case "wasm":
-		return nil, fmt.Errorf("GOARCH=wasm but GOOS is unset. Please set GOOS to wasm, wasip1, or wasip2.")
+		return nil, fmt.Errorf("GOARCH=wasm but GOOS is unset. Please set GOOS to js, wasip1, or wasip2.")
 	default:
 		return nil, fmt.Errorf("unknown GOARCH=%s", options.GOARCH)
 	}
