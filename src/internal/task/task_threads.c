@@ -58,6 +58,7 @@ void tinygo_task_init(void *mainTask, pthread_t *thread, int *numCPU, void *cont
     // Using pthread_kill, we can still send the signal to a specific thread.
     struct sigaction act = { 0 };
     act.sa_handler = tinygo_task_gc_pause;
+    act.sa_flags = SA_RESTART;
     sigaction(taskPauseSignal, &act, NULL);
 
     // Obtain the number of CPUs available on program start (for NumCPU).
