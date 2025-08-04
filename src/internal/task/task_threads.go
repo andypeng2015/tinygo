@@ -109,7 +109,7 @@ func start(fn uintptr, args unsafe.Pointer, stackSize uintptr) {
 	// and the stop-the-world GC won't see threads that haven't started yet or
 	// are not fully started yet.
 	activeTaskLock.Lock()
-	errCode := tinygo_task_start(fn, args, t, &t.state.thread, &t.state.stackTop)
+	errCode := tinygo_task_start(fn, args, t, &t.state.thread, &t.state.stackTop, stackSize)
 	if errCode != 0 {
 		runtimePanic("could not start thread")
 	}
@@ -266,7 +266,7 @@ func tinygo_task_init(t *Task, thread *threadID, numCPU *int32)
 // Here same as for tinygo_task_init.
 //
 //go:linkname tinygo_task_start tinygo_task_start
-func tinygo_task_start(fn uintptr, args unsafe.Pointer, t *Task, thread *threadID, stackTop *uintptr) int32
+func tinygo_task_start(fn uintptr, args unsafe.Pointer, t *Task, thread *threadID, stackTop *uintptr, stackSize uintptr) int32
 
 // Pause the thread by sending it a signal.
 //

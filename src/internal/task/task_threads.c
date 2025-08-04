@@ -101,7 +101,7 @@ static void* start_wrapper(void *arg) {
 };
 
 // Start a new goroutine in an OS thread.
-int tinygo_task_start(uintptr_t fn, void *args, void *task, pthread_t *thread, uintptr_t *stackTop, void *context) {
+int tinygo_task_start(uintptr_t fn, void *args, void *task, pthread_t *thread, uintptr_t *stackTop, uintptr_t stackSize, void *context) {
     // Sanity check. Should get optimized away.
     if (sizeof(pthread_t) != sizeof(void*)) {
         __builtin_trap();
@@ -118,7 +118,11 @@ int tinygo_task_start(uintptr_t fn, void *args, void *task, pthread_t *thread, u
     #else
     sem_init(&state.startlock, 0, 0);
     #endif
-    int result = pthread_create(thread, NULL, &start_wrapper, &state);
+    pthread_attr_t attrs;
+    pthread_attr_init(&attrs);
+    pthread_attr_setstacksize(&attrs, stackSize);
+    int result = pthread_create(thread, &attrs, &start_wrapper, &state);
+    pthread_attr_destroy(&attrs);
 
     // Wait until the thread has been created and read all state_pass variables.
     #if __APPLE__
