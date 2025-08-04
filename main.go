@@ -291,7 +291,8 @@ func Test(pkgName string, stdout, stderr io.Writer, options *compileopts.Options
 	})
 
 	if testConfig.CompileOnly {
-		return true, nil
+		// Return the compiler error, if there is one.
+		return true, err
 	}
 
 	importPath := strings.TrimSuffix(result.ImportPath, ".test")
@@ -1864,6 +1865,7 @@ func main() {
 						wd = ""
 					}
 					diagnostics.CreateDiagnostics(err).WriteTo(os.Stderr, wd)
+					os.Exit(1)
 				}
 				if !passed {
 					select {
