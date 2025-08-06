@@ -14,9 +14,9 @@ func init() {
 func main() {
 	println("main 1")
 	go sub()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	println("main 2")
-	time.Sleep(2 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	println("main 3")
 
 	// Await a blocking call.
@@ -103,7 +103,7 @@ func acquire(m *sync.Mutex, wg *sync.WaitGroup) {
 
 func sub() {
 	println("sub 1")
-	time.Sleep(2 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	println("sub 2")
 }
 
