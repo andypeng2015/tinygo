@@ -115,4 +115,5 @@ workflows:
   test-all:
     jobs:
       - test-oldest
-      - test-newest
+      # disable this test, since CircleCI seems unable to download due to rate-limits on Dockerhub.
+      # - test-newest
